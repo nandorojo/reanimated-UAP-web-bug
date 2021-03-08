@@ -1,55 +1,60 @@
 import * as React from "react";
-import { AnimatePresence } from 'framer-motion'
-import { StyleSheet, Pressable } from 'react-native'
-import { View } from 'moti'
+import { StyleSheet, View, Button } from "react-native";
+import Animated, {
+  useAnimatedProps,
+  useSharedValue,
+} from "react-native-reanimated";
 
-function Shape({ bg }) {
-  return (
-    <View
-      from={{
-        opacity: 0,
-        scale: 0.5,
-      }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-      }}
-      exit={{
-        opacity: 0,
-        scale: 0.9,
-      }}
-      style={[styles.shape, { backgroundColor: bg }]}
-    />
-  )
-}
+// these both do nothing for web
+Animated.addWhitelistedNativeProps({
+  pointerEvents: true,
+});
+Animated.addWhitelistedUIProps({
+  pointerEvents: true,
+});
 
 export default function App() {
-  const [visible, toggle] = React.useReducer((s) => !s, true)
+  const ready = useSharedValue(true, false);
+
+  const bottomProps = useAnimatedProps(() => ({
+    pointerEvents: ready.value ? "auto" : "none",
+  }));
+
+  const toggleReady = () => {
+    console.log(
+      "will toggle ready. currently: " + (ready.value ? "ready" : "not ready")
+    );
+    ready.value = !ready.value;
+  };
 
   return (
-    <Pressable onPress={toggle} style={styles.container}>
-      <AnimatePresence exitBeforeEnter>
-        {visible && <Shape bg="hotpink" key="hotpink" />}
-        {!visible && <Shape bg="cyan" key="cyan" />}
-      </AnimatePresence>
-    </Pressable>
-  )
+    <View style={styles.container}>
+      <View style={styles.half}>
+        <Button color="black" title="Pointer events?" onPress={toggleReady} />
+      </View>
+      <Animated.View
+        style={[styles.half, styles.bottom]}
+        animatedProps={bottomProps}
+      >
+        <Button
+          color="black"
+          title="Press me?"
+          onPress={() => alert("has pointer events!")}
+        />
+      </Animated.View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  shape: {
-    justifyContent: 'center',
-    height: 250,
-    width: 250,
-    borderRadius: 25,
-    marginRight: 10,
-    backgroundColor: 'white',
-  },
-  container: {
+  container: { flex: 1 },
+  half: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    backgroundColor: '#9c1aff',
+    backgroundColor: "hotpink",
+    justifyContent: "center",
+    alignItems: "center",
   },
-})
+  bottom: {
+    backgroundColor: "green",
+  },
+});
