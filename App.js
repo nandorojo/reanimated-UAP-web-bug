@@ -14,23 +14,25 @@ Animated.addWhitelistedUIProps({
 });
 
 export default function App() {
-  const ready = useSharedValue(true, false);
+  const pointerEvents = useSharedValue("auto");
 
   const bottomProps = useAnimatedProps(() => ({
-    pointerEvents: ready.value ? "auto" : "none",
+    pointerEvents: pointerEvents.value,
   }));
 
-  const toggleReady = () => {
-    console.log(
-      "will toggle ready. currently: " + (ready.value ? "ready" : "not ready")
-    );
-    ready.value = !ready.value;
+  const toggle = () => {
+    if (pointerEvents.value === "none") {
+      pointerEvents.value = "auto";
+    } else {
+      pointerEvents.value = "none";
+    }
+    console.log("pointer events:", pointerEvents.value);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.half}>
-        <Button color="black" title="Pointer events?" onPress={toggleReady} />
+        <Button color="black" title="Toggle Pointer Events" onPress={toggle} />
       </View>
       <Animated.View
         style={[styles.half, styles.bottom]}
